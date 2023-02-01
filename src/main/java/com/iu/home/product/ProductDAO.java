@@ -10,7 +10,7 @@ import com.iu.home.util.DBConnection;
 
 public class ProductDAO {
 	
-	public Long getProductNum () throws Exception { //찾을 상품
+	public Long getProductNum () throws Exception { //시퀀스 구하기 (찾을 상품)
 //		Connection connection = DBConnection.getConnection();
 //		String sql = "SELECT PUBLIC_SEQ.NEXTVAL FROM DUAL";
 //		PreparedStatement st = connection.prepareStatement(sql);
@@ -28,6 +28,26 @@ public class ProductDAO {
 		
 		DBConnection.disConnection(con, st, rs);
 		return num;
+	}
+	
+	public ProductDTO getProductDetail(ProductDTO dto) throws Exception {
+		Connection connection = DBConnection.getConnection();
+		String sql = "SELECT * FROM PRODUCT WHERE PRODUCT_NUM=?";
+		PreparedStatement st = connection.prepareStatement(sql);
+		st.setLong(1, dto.getProduct_num());
+		ResultSet rs = st.executeQuery();
+
+		if(rs.next()) {
+			ProductDTO productDTO = new ProductDTO();
+			productDTO.setProduct_num(rs.getLong("PRODUCT_NUM"));
+			productDTO.setProduct_name(rs.getString("PRODUCT_NAME"));
+			productDTO.setProduct_detail(rs.getString("PRODUCT_DETAIL"));
+			productDTO.setProduct_score(rs.getDouble("PRODUCT_SCORE"));
+			dto = productDTO;
+		}
+		//System.out.println(dto.getProduct_num());
+		DBConnection.disConnection(connection, st);
+		return dto;
 	}
 
 	public List<ProductOptionDTO> getProductOptionList () throws Exception {
@@ -86,11 +106,11 @@ public class ProductDAO {
 
 	public int setProduct (ProductDTO dto) throws Exception {
 		Connection connection = DBConnection.getConnection();
-		String sql = "INSERT INTO PRODUCT VALUES (?, ?, ?, 0.0)";
+		String sql = "INSERT INTO PRODUCT VALUES (PUBLIC_SEQ.NEXTVAL, ?, ?, 0.0)";
 		PreparedStatement ps = connection.prepareStatement(sql);
-		ps.setLong(1, dto.getProduct_num());
-		ps.setString(2, dto.getProduct_name());
-		ps.setString(3, dto.getProduct_detail());
+		//ps.setLong(1, dto.getProduct_num());
+		ps.setString(1, dto.getProduct_name());
+		ps.setString(2, dto.getProduct_detail());
 		//ps.setDouble(3, dto.getProduct_score());
 		
 		int result = ps.executeUpdate();
